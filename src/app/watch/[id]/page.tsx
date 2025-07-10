@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { getMediaById, PlayableMedia } from '@/lib/media';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -9,21 +10,21 @@ import { ArrowLeft, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface WatchPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function WatchPage({ params: { id } }: WatchPageProps) {
+export default function WatchPage() {
   const [mediaItem, setMediaItem] = useState<PlayableMedia | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  
+  const params = useParams();
   const searchParams = useSearchParams();
+  
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const showId = searchParams.get('show');
 
   useEffect(() => {
+    if (!id) return;
+
     async function loadMedia() {
       try {
         setIsLoading(true);

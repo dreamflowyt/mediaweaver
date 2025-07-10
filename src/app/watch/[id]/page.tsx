@@ -1,8 +1,13 @@
-import { getMediaById } from '@/lib/media';
+
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { getMediaById, PlayableMedia } from '@/lib/media';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Tv } from 'lucide-react';
+import { ArrowLeft, Tv, Frown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface WatchPageProps {
   params: {
@@ -10,21 +15,70 @@ interface WatchPageProps {
   };
   searchParams: {
     show?: string;
-  }
+  };
 }
 
-export default async function WatchPage({ params, searchParams }: WatchPageProps) {
-  const mediaItem = await getMediaById(params.id);
+export default function WatchPage({ params, searchParams }: WatchPageProps) {
+  const [mediaItem, setMediaItem] = useState<PlayableMedia | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  if (!mediaItem || (mediaItem.type !== 'movie' && mediaItem.type !== 'episode')) {
-    notFound();
+  useEffect(() => {
+    async function loadMedia() {
+      try {
+        setIsLoading(true);
+        const item = await getMediaById(params.id);
+        if (!item) {
+          setError('Media not found.');
+        } else {
+          setMediaItem(item);
+        }
+      } catch (e) {
+        console.error("Failed to load media:", e);
+        setError('Failed to load media.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadMedia();
+
+    // Cleanup function to run when the component unmounts
+    return () => {
+      const video = videoRef.current;
+      if (video) {
+        video.pause();
+        video.removeAttribute('src'); // Detach the source
+        video.load();
+      }
+    };
+  }, [params.id]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <div className="mx-auto max-w-4xl">
+          <Skeleton className="aspect-video w-full" />
+          <div className="mt-6 space-y-4">
+            <Skeleton className="h-10 w-3/4" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-5/6" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !mediaItem) {
+    notFound(); // Let Next.js handle the 404 page
   }
 
   const backLink = searchParams.show ? `/show/${searchParams.show}` : '/';
   const backText = searchParams.show ? 'Back to Show' : 'Back to Library';
   const BackIcon = searchParams.show ? Tv : ArrowLeft;
-
-  // Use the new streaming API route
   const videoUrl = `/api/stream/${mediaItem.id}`;
 
   return (
@@ -41,6 +95,7 @@ export default async function WatchPage({ params, searchParams }: WatchPageProps
       <div className="mx-auto max-w-4xl">
         <div className="aspect-video w-full overflow-hidden rounded-lg bg-card shadow-lg">
           <video
+            ref={videoRef}
             src={videoUrl}
             controls
             autoPlay

@@ -17,6 +17,9 @@ export default async function WatchPage({ params }: WatchPageProps) {
     notFound();
   }
 
+  // Use the new streaming API route
+  const videoUrl = `/api/stream/${video.id}`;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -31,7 +34,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
       <div className="mx-auto max-w-4xl">
         <div className="aspect-video w-full overflow-hidden rounded-lg bg-card shadow-lg">
           <video
-            src={video.videoUrl}
+            src={videoUrl}
             controls
             autoPlay
             className="h-full w-full"

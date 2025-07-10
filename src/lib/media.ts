@@ -48,12 +48,12 @@ export async function getMediaLibrary(): Promise<Video[]> {
         const metadataFile = await fs.readFile(metadataPath, 'utf-8');
         metadata = JSON.parse(metadataFile);
       } catch (error) {
-        // Metadata file doesn't exist, generate it without AI
+        // Metadata file doesn't exist, generate it
         const title = formatTitle(file);
         
         metadata = {
           title: title,
-          description: `Video file: ${file}`,
+          description: `A video titled "${title}".`,
           aiHint: 'video placeholder',
           thumbnailUrl: `https://placehold.co/600x400.png`,
         };
@@ -62,7 +62,7 @@ export async function getMediaLibrary(): Promise<Video[]> {
 
       return {
         id,
-        videoUrl: `/media/${file}`,
+        videoUrl: `/media/${file}`, // This is still used for non-streaming contexts if needed
         ...metadata,
       };
     })

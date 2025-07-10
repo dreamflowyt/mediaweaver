@@ -42,3 +42,26 @@ Follow these steps to get your personal media library up and running on your loc
 
 Your media library should now be visible and ready to stream. Enjoy!
 
+## Accessing from Other Devices (TV, Phone, etc.)
+
+To access your media library from another device on the same WiFi network, you'll need the local IP address of the computer running the server.
+
+1.  **Find your Local IP Address:**
+    *   **On Windows:** Open Command Prompt and type `ipconfig`. Look for the "IPv4 Address".
+    *   **On macOS:** Open Terminal and type `ifconfig | grep "inet "`. Look for the address that isn't `127.0.0.1`.
+    *   **On Linux:** Open a terminal and type `hostname -I` or `ip addr`.
+
+2.  **Run the Development Server:**
+    For easy access across devices during development, you can use the `dev` command:
+    ```
+    npm run dev
+    ```
+    This will start the server on port `9002` and make it available on your local network.
+
+3.  **Connect from Your Other Device:**
+    Open a web browser on your TV, phone, or other device and go to:
+    ```
+    http://<YOUR_COMPUTER_IP_ADDRESS>:9002
+    ```
+    (Replace `<YOUR_COMPUTER_IP_ADDRESS>` with the address you found in step 1).
+

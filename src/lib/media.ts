@@ -2,7 +2,6 @@
 
 import path from 'path';
 import fs from 'fs/promises';
-import { generateMediaMetadata } from '@/ai/flows/generate-media-metadata-flow';
 
 export interface Video {
   id: string;
@@ -24,6 +23,14 @@ async function ensureDirectoryExists(dir: string) {
   }
 }
 
+// Helper function to format filename into a title
+function formatTitle(filename: string): string {
+    const nameWithoutExtension = path.parse(filename).name;
+    return nameWithoutExtension
+        .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
+        .replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()); // Capitalize each word
+}
+
 export async function getMediaLibrary(): Promise<Video[]> {
   await ensureDirectoryExists(mediaDirectory);
   await ensureDirectoryExists(metadataDirectory);
@@ -41,31 +48,14 @@ export async function getMediaLibrary(): Promise<Video[]> {
         const metadataFile = await fs.readFile(metadataPath, 'utf-8');
         metadata = JSON.parse(metadataFile);
       } catch (error) {
-        // Metadata file doesn't exist, generate it
-        const videoPath = path.join(mediaDirectory, file);
-        const videoBuffer = await fs.readFile(videoPath);
-        const videoDataUri = `data:video/${path.extname(file).substring(1)};base64,${videoBuffer.toString(
-          'base64'
-        )}`;
-
-        const generatedMetadata = await generateMediaMetadata({
-          fileName: file,
-          videoDataUri,
-        });
-
-        const thumbnailBuffer = Buffer.from(
-          generatedMetadata.thumbnailDataUri.split(',')[1],
-          'base64'
-        );
-        const thumbnailFilename = `${id}.png`;
-        const thumbnailPath = path.join(metadataDirectory, thumbnailFilename);
-        await fs.writeFile(thumbnailPath, thumbnailBuffer);
-
+        // Metadata file doesn't exist, generate it without AI
+        const title = formatTitle(file);
+        
         metadata = {
-          title: generatedMetadata.title,
-          description: generatedMetadata.description,
-          aiHint: generatedMetadata.aiHint,
-          thumbnailUrl: `/metadata/${thumbnailFilename}`,
+          title: title,
+          description: `Video file: ${file}`,
+          aiHint: 'video placeholder',
+          thumbnailUrl: `https://placehold.co/600x400.png`,
         };
         await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
       }

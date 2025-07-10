@@ -1,0 +1,44 @@
+
+# StreamWeaver - Local Deployment Instructions
+
+Follow these steps to get your personal media library up and running on your local machine.
+
+## Prerequisites
+
+- **Node.js**: Make sure you have Node.js (version 18 or newer) installed on your computer. You can download it from [https://nodejs.org/](https://nodejs.org/).
+
+## Step 1: Install Dependencies
+
+1.  Open a terminal or command prompt in the project's root directory (the same folder where this file is located).
+2.  Run the following command to install all the necessary packages for the application:
+    ```
+    npm install
+    ```
+
+## Step 2: Add Your Media
+
+1.  Navigate to the `public/media` folder within the project directory.
+2.  Copy your video files (e.g., `.mp4`, `.mkv`, `.webm`) into this `public/media` folder.
+3.  (Optional) For subtitles, place your `.vtt` subtitle files in the same folder. Ensure the subtitle file has the exact same name as the video file (e.g., `my-movie.mp4` and `my-movie.vtt`).
+
+## Step 3: Build and Run the Application
+
+1.  After the installation is complete and you've added your media, run the following command to build the application for production:
+    ```
+    npm run build
+    ```
+2.  Once the build is finished, start the application server with this command:
+    ```
+    npm run start
+    ```
+
+## Step 4: Access Your Library
+
+1.  Open your web browser (like Chrome, Firefox, or Edge).
+2.  Go to the following address:
+    ```
+    http://localhost:3000
+    ```
+
+Your media library should now be visible and ready to stream. Enjoy!
+

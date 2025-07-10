@@ -16,7 +16,14 @@ export default async function Home() {
           ))}
         </div>
       ) : (
-        <p>No videos found in your library.</p>
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-card p-12 text-center">
+          <h2 className="text-xl font-semibold tracking-tight">
+            Your Media Library is Empty
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            It looks like there are no videos here yet.
+          </p>
+        </div>
       )}
     </div>
   );

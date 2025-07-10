@@ -1,7 +1,7 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { getMediaById, PlayableMedia } from '@/lib/media';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -13,16 +13,15 @@ interface WatchPageProps {
   params: {
     id: string;
   };
-  searchParams: {
-    show?: string;
-  };
 }
 
-export default function WatchPage({ params: { id }, searchParams }: WatchPageProps) {
+export default function WatchPage({ params: { id } }: WatchPageProps) {
   const [mediaItem, setMediaItem] = useState<PlayableMedia | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const searchParams = useSearchParams();
+  const showId = searchParams.get('show');
 
   useEffect(() => {
     async function loadMedia() {
@@ -76,9 +75,9 @@ export default function WatchPage({ params: { id }, searchParams }: WatchPagePro
     notFound(); // Let Next.js handle the 404 page
   }
 
-  const backLink = searchParams.show ? `/show/${searchParams.show}` : '/';
-  const backText = searchParams.show ? 'Back to Show' : 'Back to Library';
-  const BackIcon = searchParams.show ? Tv : ArrowLeft;
+  const backLink = showId ? `/show/${showId}` : '/';
+  const backText = showId ? 'Back to Show' : 'Back to Library';
+  const BackIcon = showId ? Tv : ArrowLeft;
   const videoUrl = `/api/stream/${mediaItem.id}`;
 
   return (

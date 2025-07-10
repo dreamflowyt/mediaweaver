@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import type { Video } from '@/lib/media';
+import type { Movie } from '@/lib/media';
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 
 interface VideoCardProps {
-  video: Video;
+  video: Movie;
 }
 
 export function VideoCard({ video }: VideoCardProps) {

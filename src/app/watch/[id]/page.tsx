@@ -1,32 +1,39 @@
-import { getVideoById } from '@/lib/media';
+import { getMediaById } from '@/lib/media';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface WatchPageProps {
   params: {
     id: string;
   };
+  searchParams: {
+    show?: string;
+  }
 }
 
-export default async function WatchPage({ params }: WatchPageProps) {
-  const video = await getVideoById(params.id);
+export default async function WatchPage({ params, searchParams }: WatchPageProps) {
+  const mediaItem = await getMediaById(params.id);
 
-  if (!video) {
+  if (!mediaItem || (mediaItem.type !== 'movie' && mediaItem.type !== 'episode')) {
     notFound();
   }
 
+  const backLink = searchParams.show ? `/show/${searchParams.show}` : '/';
+  const backText = searchParams.show ? 'Back to Show' : 'Back to Library';
+  const BackIcon = searchParams.show ? Tv : ArrowLeft;
+
   // Use the new streaming API route
-  const videoUrl = `/api/stream/${video.id}`;
+  const videoUrl = `/api/stream/${mediaItem.id}`;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Button asChild variant="ghost">
-          <Link href="/">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Library
+          <Link href={backLink}>
+            <BackIcon className="mr-2 h-4 w-4" />
+            {backText}
           </Link>
         </Button>
       </div>
@@ -40,9 +47,9 @@ export default async function WatchPage({ params }: WatchPageProps) {
             crossOrigin="anonymous"
             className="h-full w-full"
           >
-            {video.subtitlesUrl && (
+            {mediaItem.subtitlesUrl && (
               <track
-                src={video.subtitlesUrl}
+                src={mediaItem.subtitlesUrl}
                 kind="subtitles"
                 srcLang="en"
                 label="English"
@@ -55,10 +62,10 @@ export default async function WatchPage({ params }: WatchPageProps) {
 
         <div className="mt-6 rounded-lg bg-card p-6 shadow-md">
           <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-            {video.title}
+            {mediaItem.title}
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            {video.description}
+            {mediaItem.description}
           </p>
         </div>
       </div>

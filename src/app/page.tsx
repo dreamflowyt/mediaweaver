@@ -1,23 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Video } from '@/lib/media';
+import type { MediaItem } from '@/lib/media';
 import { getMediaLibrary } from '@/lib/media';
 import { VideoCard } from '@/components/video-card';
+import { ShowCard } from '@/components/show-card';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadMedia() {
       try {
-        const media = await getMediaLibrary();
-        setVideos(media);
+        const mediaLibrary = await getMediaLibrary();
+        setMedia(mediaLibrary);
       } catch (error) {
         console.error("Failed to load media library:", error);
       } finally {
@@ -27,8 +28,8 @@ export default function Home() {
     loadMedia();
   }, []);
 
-  const filteredVideos = videos.filter((video) =>
-    video.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredMedia = media.filter((item) =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -41,7 +42,7 @@ export default function Home() {
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search for a video..."
+            placeholder="Search media..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -58,21 +59,27 @@ export default function Home() {
              </div>
           ))}
         </div>
-      ) : filteredVideos.length > 0 ? (
+      ) : filteredMedia.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {filteredVideos.map((video) => (
-            <VideoCard key={video.id} video={video} />
-          ))}
+          {filteredMedia.map((item) => {
+            if (item.type === 'movie') {
+              return <VideoCard key={item.id} video={item} />;
+            }
+            if (item.type === 'show') {
+                return <ShowCard key={item.id} show={item} />;
+            }
+            return null;
+          })}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-card p-12 text-center">
           <h2 className="text-xl font-semibold tracking-tight">
-            {searchQuery ? 'No videos found' : 'Your Media Library is Empty'}
+            {searchQuery ? 'No media found' : 'Your Media Library is Empty'}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {searchQuery
               ? 'Try adjusting your search.'
-              : 'It looks like there are no videos here yet.'}
+              : 'Add movies or TV shows to your public/media folder.'}
           </p>
         </div>
       )}

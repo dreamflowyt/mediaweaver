@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getMediaById, PlayableMedia } from '@/lib/media';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Tv, Frown } from 'lucide-react';
+import { ArrowLeft, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -18,7 +18,7 @@ interface WatchPageProps {
   };
 }
 
-export default function WatchPage({ params, searchParams }: WatchPageProps) {
+export default function WatchPage({ params: { id }, searchParams }: WatchPageProps) {
   const [mediaItem, setMediaItem] = useState<PlayableMedia | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export default function WatchPage({ params, searchParams }: WatchPageProps) {
     async function loadMedia() {
       try {
         setIsLoading(true);
-        const item = await getMediaById(params.id);
+        const item = await getMediaById(id);
         if (!item) {
           setError('Media not found.');
         } else {
@@ -52,7 +52,7 @@ export default function WatchPage({ params, searchParams }: WatchPageProps) {
         video.load();
       }
     };
-  }, [params.id]);
+  }, [id]);
 
   if (isLoading) {
     return (

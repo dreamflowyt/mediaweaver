@@ -1,27 +1,78 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import type { Video } from '@/lib/media';
 import { getMediaLibrary } from '@/lib/media';
 import { VideoCard } from '@/components/video-card';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function Home() {
-  const videos = await getMediaLibrary();
+export default function Home() {
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadMedia() {
+      try {
+        const media = await getMediaLibrary();
+        setVideos(media);
+      } catch (error) {
+        console.error("Failed to load media library:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadMedia();
+  }, []);
+
+  const filteredVideos = videos.filter((video) =>
+    video.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-4xl font-bold font-headline tracking-tight">
-        Media Library
-      </h1>
-      {videos.length > 0 ? (
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+        <h1 className="text-4xl font-bold font-headline tracking-tight">
+          Media Library
+        </h1>
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search for a video..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      {isLoading ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {videos.map((video) => (
+          {Array.from({ length: 10 }).map((_, index) => (
+             <div key={index} className="space-y-2">
+                <Skeleton className="aspect-video w-full" />
+                <Skeleton className="h-6 w-3/4" />
+             </div>
+          ))}
+        </div>
+      ) : filteredVideos.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {filteredVideos.map((video) => (
             <VideoCard key={video.id} video={video} />
           ))}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-card p-12 text-center">
           <h2 className="text-xl font-semibold tracking-tight">
-            Your Media Library is Empty
+            {searchQuery ? 'No videos found' : 'Your Media Library is Empty'}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            It looks like there are no videos here yet.
+            {searchQuery
+              ? 'Try adjusting your search.'
+              : 'It looks like there are no videos here yet.'}
           </p>
         </div>
       )}

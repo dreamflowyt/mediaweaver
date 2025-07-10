@@ -14,19 +14,34 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadMedia() {
-      try {
-        const mediaLibrary = await getMediaLibrary();
-        setMedia(mediaLibrary);
-      } catch (error) {
-        console.error("Failed to load media library:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  async function loadMedia() {
+    try {
+      const mediaLibrary = await getMediaLibrary();
+      setMedia(mediaLibrary);
+    } catch (error) {
+      console.error("Failed to load media library:", error);
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadMedia();
-  }, []);
+
+    const intervalId = setInterval(async () => {
+      try {
+        const newMediaLibrary = await getMediaLibrary();
+        // Simple check to see if the library has changed to avoid unnecessary re-renders
+        if (JSON.stringify(newMediaLibrary) !== JSON.stringify(media)) {
+          setMedia(newMediaLibrary);
+        }
+      } catch (error) {
+        console.error("Failed to refresh media library:", error);
+      }
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+  }, [media]);
 
   const filteredMedia = media.filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())

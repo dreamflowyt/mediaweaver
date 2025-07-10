@@ -37,8 +37,18 @@ export default async function WatchPage({ params }: WatchPageProps) {
             src={videoUrl}
             controls
             autoPlay
+            crossOrigin="anonymous"
             className="h-full w-full"
           >
+            {video.subtitlesUrl && (
+              <track
+                src={video.subtitlesUrl}
+                kind="subtitles"
+                srcLang="en"
+                label="English"
+                default
+              />
+            )}
             Your browser does not support the video tag.
           </video>
         </div>

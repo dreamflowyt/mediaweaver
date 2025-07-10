@@ -10,6 +10,7 @@ export interface Video {
   thumbnailUrl: string;
   videoUrl: string;
   aiHint: string;
+  subtitlesUrl?: string;
 }
 
 const mediaDirectory = path.join(process.cwd(), 'public', 'media');
@@ -29,6 +30,16 @@ function formatTitle(filename: string): string {
     return nameWithoutExtension
         .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
         .replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()); // Capitalize each word
+}
+
+// Helper function to check if a file exists
+async function fileExists(filePath: string): Promise<boolean> {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 export async function getMediaLibrary(): Promise<Video[]> {
@@ -60,9 +71,13 @@ export async function getMediaLibrary(): Promise<Video[]> {
         await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
       }
 
+      const subtitlesPath = path.join(mediaDirectory, `${id}.vtt`);
+      const hasSubtitles = await fileExists(subtitlesPath);
+
       return {
         id,
         videoUrl: `/media/${file}`, // This is still used for non-streaming contexts if needed
+        subtitlesUrl: hasSubtitles ? `/media/${id}.vtt` : undefined,
         ...metadata,
       };
     })
